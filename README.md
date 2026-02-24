@@ -1,6 +1,6 @@
 # COMPILEME — Online C++ Compiler
 
-A minimal online C++ compiler. Write code in the browser, hit Run — it compiles and executes inside a fresh Docker container every time. The host machine never touches user code.
+I built this as a minimal online C++ compiler. You write code in the browser, hit Run — it compiles and executes inside a fresh Docker container every time. The host machine never touches user code directly.
 
 **Live demo:** http://16.16.207.215:3300
 
@@ -177,11 +177,15 @@ COMPILEME/
 │   └── index.html         Code editor UI (plain HTML + JS)
 ├── docs/
 │   └── index.html         Build docs — served at /docs
+├── .github/
+│   └── workflows/
+│       └── deploy.yml     GitHub Actions auto-deploy workflow
 ├── Dockerfile             Containerises the Node backend
 ├── docker-compose.yml     Runs backend + mounts Docker socket
 ├── SETUP.md               Local setup guide
 ├── AWS_DEPLOY.md          AWS EC2 deployment walkthrough
 ├── CI_CD.md               Domain + GitHub CI/CD guide
+├── ROADMAP.md             What's done and what's next
 └── README.md              This file
 ```
 
@@ -194,13 +198,14 @@ COMPILEME/
 | [SETUP.md](SETUP.md) | Detailed local run guide with troubleshooting |
 | [AWS_DEPLOY.md](AWS_DEPLOY.md) | Full AWS EC2 deploy walkthrough, plain English |
 | [CI_CD.md](CI_CD.md) | Domain mapping + GitHub Actions auto-deploy |
+| [ROADMAP.md](ROADMAP.md) | What's done and what's planned next |
 | `/docs` route | In-app build docs at `http://localhost:3300/docs` |
 
 ---
 
 ## Live Deployment
 
-Currently running on AWS EC2 (t3.micro, Ubuntu 22.04):
+Currently running on AWS EC2 (t3.micro, Ubuntu 22.04). See [AWS_DEPLOY.md](AWS_DEPLOY.md) for the full walkthrough of how I set it up.
 
 ```
 http://16.16.207.215:3300

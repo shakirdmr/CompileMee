@@ -224,8 +224,8 @@
     <div style="margin-bottom:32px;">
       <h1 style="font-size:26px;font-weight:800;color:#1f2328;margin-bottom:8px;">Build Docs</h1>
       <p style="font-size:15px;">
-        A chronological walkthrough of how COMPILEME was built — from empty folder to a
-        fully sandboxed online C++ compiler.
+        A chronological walkthrough of how I built COMPILEME — from empty folder to a
+        fully sandboxed online C++ compiler running live on AWS.
       </p>
     </div>
 
@@ -236,7 +236,7 @@
     </h2>
 
     <p>
-      The first decision was the tech stack. The goal was a <strong>minimal, dependency-light</strong>
+      The first decision I made was the tech stack. My goal was a <strong>minimal, dependency-light</strong>
       prototype — no databases, no auth, no framework overhead.
     </p>
 
@@ -279,7 +279,7 @@
     </h2>
 
     <p>
-      The backend is a single file: <code>backend/server.js</code>.
+      I kept the backend to a single file: <code>backend/server.js</code>.
       It exposes one endpoint and serves the frontend as static files.
     </p>
 
@@ -301,7 +301,7 @@ Content-Type: application/json
     <h3>Child process</h3>
     <p>
       Node's built-in <code>child_process.spawn</code> launches <code>docker run</code>.
-      We use <code>spawn</code> (not <code>exec</code>) so we can pipe stdin without
+      I use <code>spawn</code> (not <code>exec</code>) so I can pipe stdin without
       shell quoting issues.
     </p>
     <pre><code>const proc = spawn('docker', dockerArgs);
@@ -320,12 +320,12 @@ proc.stdin.end();</code></pre>
     </h2>
 
     <p>
-      Every code submission gets its own brand-new container. There is no shared state.
+      Every code submission gets its own brand-new container. There is no shared state between runs.
     </p>
 
     <h3>Execution strategy</h3>
     <p>
-      Instead of mounting host directories, the source code is piped via <strong>stdin</strong>:
+      Instead of mounting host directories, I pipe the source code via <strong>stdin</strong>:
     </p>
     <pre><code>bash -c 'cat > /tmp/main.cpp \
   &amp;&amp; g++ /tmp/main.cpp -o /tmp/main 2>&amp;1 \
@@ -369,7 +369,7 @@ proc.stdin.end();</code></pre>
 
     <p>
       A single <code>frontend/index.html</code> — no build step, no npm install, no framework.
-      Express serves it as a static file at <code>/</code>.
+      I wanted zero frontend tooling overhead. Express serves it as a static file at <code>/</code>.
     </p>
 
     <h3>Key UI elements</h3>
@@ -410,15 +410,15 @@ outputEl.textContent = data.output;</code></pre>
 
     <h3>No shell injection</h3>
     <p>
-      The C++ code is never interpolated into a shell string. It is written to
+      The C++ code is never interpolated into a shell string. I write it to
       <code>proc.stdin</code> as raw bytes. This means backticks, semicolons, dollar signs,
       quotes — none of them can escape the container.
     </p>
 
     <h3>No host filesystem access</h3>
     <p>
-      No directories are mounted from the host. The container's <code>/tmp</code> is ephemeral
-      and disappears with <code>--rm</code>.
+      I don't mount any host directories. The container's <code>/tmp</code> is ephemeral
+      and disappears automatically with <code>--rm</code>.
     </p>
 
     <h3>No network from containers</h3>
@@ -429,7 +429,7 @@ outputEl.textContent = data.output;</code></pre>
 
     <h3>Input size cap</h3>
     <p>
-      Payloads over 50 KB are rejected before Docker is ever invoked. Express's
+      I reject payloads over 50 KB before Docker is ever invoked. Express's
       <code>json({ limit: '100kb' })</code> handles the HTTP layer.
     </p>
 
@@ -517,8 +517,8 @@ open http://localhost:3300</code></pre>
     </h2>
 
     <p>
-      The app is deployed on <strong>AWS EC2</strong> — a rented Linux server running 24/7 in Amazon's
-      data center. We chose EC2 because it lets us run <code>docker run</code> directly, which is
+      I deployed this on <strong>AWS EC2</strong> — a rented Linux server running 24/7 in Amazon's
+      data center. I chose EC2 because it lets me run <code>docker run</code> directly, which is
       impossible on serverless platforms like Vercel or Render.
     </p>
 
@@ -547,8 +547,8 @@ open http://localhost:3300</code></pre>
 
     <h3>Uploading code</h3>
     <p>
-      The project was copied from Mac to server using <code>scp -r</code> (Secure Copy Protocol — file
-      transfer over SSH). After upload, <code>docker pull gcc:latest</code> was run to pre-download
+      I copied the project from my Mac to the server using <code>scp -r</code> (Secure Copy Protocol — file
+      transfer over SSH). After upload, I ran <code>docker pull gcc:latest</code> to pre-download
       the 1.2 GB image so the first compile request is fast.
     </p>
 
@@ -569,15 +569,15 @@ pm2 startup     # register as a boot service (run the printed sudo command)</cod
 
     <h3>Connecting a domain</h3>
     <p>
-      A domain name is mapped to the server IP via a <strong>DNS A Record</strong> at the registrar.
-      Two records are added — one for the root domain (<code>@</code>) and one for <code>www</code> —
+      I map a domain name to the server IP via a <strong>DNS A Record</strong> at the registrar.
+      Two records — one for the root domain (<code>@</code>) and one for <code>www</code> —
       both pointing to <code>16.16.207.215</code>. DNS propagation takes 5–30 minutes.
     </p>
 
     <h3>Nginx reverse proxy</h3>
     <p>
-      <strong>Nginx</strong> sits in front of Node and forwards standard HTTP (port 80) traffic to
-      port 3300, so users never type <code>:3300</code> in the URL.
+      I put <strong>Nginx</strong> in front of Node to forward standard HTTP (port 80) traffic to
+      port 3300, so users never have to type <code>:3300</code> in the URL.
     </p>
     <pre><code>server {
     listen 80;
@@ -589,16 +589,16 @@ pm2 startup     # register as a boot service (run the printed sudo command)</cod
 
     <h3>Free HTTPS with Certbot</h3>
     <p>
-      <strong>Certbot</strong> (Let's Encrypt) issues a free SSL certificate and edits the Nginx config
-      automatically. Certificates renew every 90 days without manual action.
+      I use <strong>Certbot</strong> (Let's Encrypt) for a free SSL certificate. It edits the Nginx config
+      automatically and renews every 90 days without any manual action from me.
     </p>
     <pre><code>sudo certbot --nginx -d compileme.dev -d www.compileme.dev</code></pre>
 
     <h3>GitHub Actions CI/CD</h3>
     <p>
-      A <code>.github/workflows/deploy.yml</code> file tells GitHub: whenever code is pushed to
+      I have a <code>.github/workflows/deploy.yml</code> that tells GitHub: whenever I push to
       <code>main</code>, SSH into the EC2 server and run <code>~/deploy.sh</code>.
-      The SSH private key is stored as a GitHub Secret — encrypted, never visible in logs.
+      My SSH private key is stored as a GitHub Secret — encrypted, never visible in logs.
     </p>
 
     <div class="flow">
@@ -623,8 +623,8 @@ pm2 restart compileme
 echo "Deploy done."</code></pre>
 
     <div class="callout">
-      After initial setup, every <code>git push</code> to <code>main</code> auto-deploys the latest
-      code to the live server in about 15 seconds. No manual SSH required.
+      After initial setup, every <code>git push</code> to <code>main</code> auto-deploys my latest
+      code to the live server in about 15 seconds. I never have to SSH in manually again.
     </div>
 
     <br/><br/>

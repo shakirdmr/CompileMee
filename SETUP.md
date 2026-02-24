@@ -1,6 +1,9 @@
-# COMPILEME — How to Run
+# COMPILEME — How to Run It Locally
 
-This document covers everything you need to go from zero to a running compiler in your browser.
+This is my guide to getting the compiler running on your own machine. I wrote it step by step so you don't have to guess anything.
+
+For AWS deployment, see [AWS_DEPLOY.md](AWS_DEPLOY.md).
+For CI/CD and domain setup, see [CI_CD.md](CI_CD.md).
 
 ---
 
@@ -80,7 +83,7 @@ Press `Ctrl + C` in the terminal where the server is running.
 
 Use this if you want to containerise the backend too, or if you don't want to install Node locally.
 
-> **Heads up:** The backend container needs to spawn child Docker containers. This is done by mounting the host's Docker socket into the backend container (`/var/run/docker.sock`). The `docker-compose.yml` handles this automatically.
+> **Heads up:** The backend container needs to spawn child Docker containers. I do this by mounting the host's Docker socket into the backend container (`/var/run/docker.sock`). The `docker-compose.yml` handles this automatically.
 
 ### Step 1 — Pull the gcc image
 
@@ -205,3 +208,12 @@ sudo usermod -aG docker $USER
 7. The browser displays the output.
 
 Time limit: **2 seconds** per run. Memory limit: **256 MB**. No network access from inside the container.
+
+---
+
+## Related docs
+
+- [README.md](README.md) — project overview and quick start
+- [AWS_DEPLOY.md](AWS_DEPLOY.md) — how I deployed this on AWS EC2
+- [CI_CD.md](CI_CD.md) — domain setup and GitHub auto-deploy
+- [ROADMAP.md](ROADMAP.md) — what's planned next

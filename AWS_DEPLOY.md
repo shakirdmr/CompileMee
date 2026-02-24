@@ -1,7 +1,10 @@
-# AWS Deployment — What We Did & Why
+# AWS Deployment — What I Did & Why
 
-A plain-English walkthrough of every step taken to deploy COMPILEME on AWS EC2.
-Written so anyone can follow it without prior cloud experience.
+This is a plain-English walkthrough of every step I took to deploy COMPILEME on AWS EC2.
+I wrote it so anyone can follow it without prior cloud experience — the same way I had to figure it out myself.
+
+For domain mapping and CI/CD after deployment, see [CI_CD.md](CI_CD.md).
+For local setup, see [SETUP.md](SETUP.md).
 
 ---
 
@@ -21,7 +24,7 @@ The t2.micro size (1 CPU, 1 GB RAM) is free for 12 months on a new AWS account.
 ### What is an "instance"?
 An instance = one rented server. You configure it before turning it on.
 
-### Choices made and why:
+### Choices I made and why:
 
 **OS: Ubuntu 22.04**
 Ubuntu is a Linux distribution. Linux is what almost all servers on the internet run.
@@ -36,7 +39,7 @@ More than enough for a small compiler app.
 Think of this as a physical key to your server.
 AWS gives you a file (`.pem`) that acts as your password — but it's a cryptographic key, not a string you type.
 You use it every time you SSH (connect) to the server.
-`.pem` format is for Mac/Linux. `.ppk` is for Windows — we're on Mac so we chose `.pem`.
+`.pem` format is for Mac/Linux. `.ppk` is for Windows — I'm on Mac so I chose `.pem`.
 **Never lose this file. AWS never shows it again after download.**
 
 ---
@@ -48,7 +51,7 @@ It's a firewall that sits in front of your server.
 By default ALL ports are blocked — nothing can reach your server from the internet.
 You have to explicitly punch holes (rules) to allow specific traffic in.
 
-### Rules we added:
+### Rules I added:
 
 **SSH — Port 22, Source 0.0.0.0/0**
 This was already there by default.
@@ -56,9 +59,9 @@ Port 22 is the SSH port. Without this rule open you'd be completely locked out a
 `0.0.0.0/0` means "allow from any IP address" — this lets you connect from home, a coffee shop, anywhere.
 
 **Custom TCP — Port 3300, Source 0.0.0.0/0**
-This is the port our Node.js app listens on.
+This is the port my Node.js app listens on.
 Without this rule, browsers on the internet would get a connection refused error when visiting `http://YOUR_IP:3300`.
-`0.0.0.0/0` again means anyone can access it — which is what we want for a public web app.
+`0.0.0.0/0` again means anyone can access it — which is what I want for a public web app.
 
 ### Why does the yellow warning appear?
 AWS shows a warning saying "0.0.0.0/0 allows all IP addresses to access your instance."
@@ -107,7 +110,7 @@ Without this, every `docker` command would need `sudo` in front of it.
 `newgrp docker` applies the group change in the current session without needing to log out and back in.
 
 **Why Docker?**
-Our app needs Docker to spin up gcc containers for each compile request.
+My app needs Docker to spin up gcc containers for each compile request.
 Without Docker installed on this server, `docker run gcc:latest` would fail with "command not found".
 
 ---
@@ -125,7 +128,7 @@ Ubuntu's default `apt` repository has an outdated Node version.
 The first command adds the NodeSource repo. The second installs Node.js 20 from it.
 
 **Why Node.js?**
-Our backend (`server.js`) is a Node.js app. Without Node installed, you can't run it.
+My backend (`server.js`) is a Node.js app. Without Node installed, you can't run it.
 
 ---
 
@@ -152,7 +155,7 @@ scp -i ~/Downloads/compileme-key.pem -r /Users/alif/Desktop/TuringLabs/COMPILEME
 
 **What is SCP?**
 SCP = Secure Copy Protocol. It copies files over SSH.
-`-i` specifies the key file (same one we use for SSH).
+`-i` specifies the key file (same one I use for SSH).
 `-r` means recursive — copies the entire folder including all subfolders.
 The last two arguments are `source` (your Mac) and `destination` (the server).
 
@@ -192,16 +195,16 @@ pm2 startup
 
 **`pm2 save`** — saves the current list of PM2 processes to disk. Without this, PM2 forgets what to restart after a reboot.
 
-**`pm2 startup`** — generates a system command that registers PM2 as a startup service. It prints a long `sudo env PATH=...` command that you must copy and run manually. This is what makes your app survive server reboots.
+**`pm2 startup`** — generates a system command that registers PM2 as a startup service. It prints a long `sudo env PATH=...` command that you must copy and run manually. This is what makes the app survive server reboots.
 
 ---
 
-## Common Doubts We Had
+## Doubts I Had Along the Way
 
 ### "Should the gcc container show up in Docker Desktop?"
 No. The containers are created and destroyed per request (because of `--rm` flag).
 They flash into existence for ~1–3 seconds then self-delete.
-What you will see permanently is the `gcc:latest` entry under Docker Desktop's **Images** tab.
+What I do see permanently is the `gcc:latest` entry under Docker Desktop's **Images** tab.
 
 ### "The scp upload seemed slow — is there a problem without .gitignore?"
 No problem. SCP copied `node_modules` if it existed locally, which made it larger.
@@ -219,7 +222,7 @@ It looks like:
 sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
 ```
 This command tells Ubuntu's systemd (the service manager) to start PM2 when the server boots.
-Without running it, if AWS restarts your instance (maintenance, reboot), your app goes offline and stays offline.
+Without running it, if AWS restarts the instance (maintenance, reboot), the app goes offline and stays offline.
 You must copy-paste and run it manually — PM2 can't run it for you because it needs root privileges (`sudo`).
 
 ---
@@ -245,11 +248,19 @@ ssh -i ~/Downloads/compileme-key.pem ubuntu@16.16.207.215
 
 ---
 
-## Your App is Live At
+## The App is Live At
 
 ```
 http://16.16.207.215:3300
 ```
+
+---
+
+## What's Next
+
+Once the app was live, I still needed to set up a domain, Nginx, HTTPS, and CI/CD so I don't have to manually SSH in every time I make a change. All of that is in [CI_CD.md](CI_CD.md).
+
+See [ROADMAP.md](ROADMAP.md) for the full list of what's pending.
 
 ---
 

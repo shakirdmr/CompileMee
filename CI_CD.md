@@ -1,14 +1,17 @@
-# Domain + CI/CD — What It Is & How To Set It Up
+# Domain + CI/CD — What I Did & How To Set It Up
 
-Plain-English guide to connecting a domain name to your server
-and making GitHub auto-deploy your code every time you push.
+My plain-English guide to connecting a domain name to the server
+and making GitHub auto-deploy code every time I push.
+
+This picks up where [AWS_DEPLOY.md](AWS_DEPLOY.md) left off — the server is already running.
+For local setup, see [SETUP.md](SETUP.md). For what's still pending, see [ROADMAP.md](ROADMAP.md).
 
 ---
 
 ## Part 1 — Connecting a Domain Name
 
 ### What is a domain name, actually?
-Right now your app lives at `http://16.16.207.215:3300`.
+Right now the app lives at `http://16.16.207.215:3300`.
 That IP address is hard to remember and looks unprofessional.
 A domain name (like `compileme.dev`) is just a human-readable label that points to that IP.
 When someone types `compileme.dev` in a browser, the internet looks up which IP it maps to, then connects there.
@@ -110,11 +113,11 @@ Now `https://compileme.dev` works. Certificate renews itself every 90 days for f
 
 Without CI/CD:
 - Edit code on Mac → manually `scp` files to server → manually SSH in → manually restart PM2
-- Every single time you make a change.
+- Every single time I make a change.
 
 With CI/CD:
-- Edit code on Mac → `git push` → GitHub automatically SSHs into your server and restarts the app
-- You never touch the server again after initial setup.
+- Edit code on Mac → `git push` → GitHub automatically SSHs into the server and restarts the app
+- I never touch the server again after initial setup.
 
 ---
 
@@ -154,7 +157,7 @@ git add .
 git commit -m "initial commit"
 ```
 
-Create a new **empty** repo on github.com (don't add README or .gitignore there — you already have them).
+Create a new **empty** repo on github.com (don't add README or .gitignore there — I already have them).
 Then connect and push:
 ```bash
 git remote add origin https://github.com/YOURUSER/compileme.git
@@ -162,7 +165,7 @@ git branch -M main
 git push -u origin main
 ```
 
-Your code is now on GitHub.
+The code is now on GitHub.
 
 ---
 
@@ -181,13 +184,13 @@ cd ~/compileme/backend && npm install
 pm2 restart compileme
 ```
 
-Now the server's code comes from GitHub, not from scp.
+Now the server's code comes from GitHub, not from scp uploads.
 
 ---
 
 ### Step 3 — Create a deploy script on the server
 
-This is the script GitHub Actions will run every time you push:
+This is the script GitHub Actions will run every time I push:
 ```bash
 nano ~/deploy.sh
 ```
@@ -249,14 +252,14 @@ jobs:
 ```
 
 **What does this file do?**
-It tells GitHub: "Whenever code is pushed to `main`, connect to my server via SSH and run `~/deploy.sh`."
-`appleboy/ssh-action` is a pre-built GitHub Action (like a plugin) that handles the SSH connection for you.
+It tells GitHub: "Whenever code is pushed to `main`, SSH into my server and run `~/deploy.sh`."
+`appleboy/ssh-action` is a pre-built GitHub Action (like a plugin) that handles the SSH connection.
 
 ---
 
 ### Step 5 — Add your SSH key to GitHub Secrets
 
-GitHub needs your private key to SSH into your server. You store it as a **Secret** (encrypted, never visible).
+GitHub needs my private key to SSH into the server. I store it as a **Secret** (encrypted, never visible).
 
 **Get the contents of your key file** (on your Mac):
 ```bash
@@ -296,16 +299,16 @@ From now on, every `git push` to `main` auto-deploys in ~15 seconds.
 ## Common Questions
 
 ### "What if the deploy fails?"
-GitHub Actions will show a red X and send you an email.
+GitHub Actions will show a red X and send an email.
 Click the failed run to see which step errored and the full log output.
-Your live site is unaffected — the old version keeps running until a successful deploy.
+The live site is unaffected — the old version keeps running until a successful deploy.
 
 ### "What if I want to deploy from a branch other than main?"
 Change `branches: [main]` in the workflow to whichever branch you want.
-Common pattern: `develop` branch for testing, `main` for production.
+My pattern: `develop` branch for testing, `main` for production.
 
 ### "Do I need to SSH into the server anymore?"
-Almost never. The only reasons to SSH in:
+Almost never. The only reasons I'd SSH in:
 - Something broke badly and needs manual fixing
 - Checking logs with `pm2 logs compileme`
 - One-time setup tasks
