@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COMPILEME — Build Docs</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f6f8fa;
+      color: #1f2328;
+      line-height: 1.7;
+    }
+
+    /* ── Layout ── */
+    .page { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    nav {
+      width: 220px;
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1px solid #d0d7de;
+      padding: 28px 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    nav .logo { font-weight: 700; font-size: 15px; color: #0969da; margin-bottom: 24px; display: block; text-decoration: none; }
+    nav ul { list-style: none; }
+    nav li { margin-bottom: 4px; }
+    nav a {
+      display: block;
+      font-size: 13px;
+      color: #57606a;
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: background 0.1s, color 0.1s;
+    }
+    nav a:hover, nav a.active { background: #ddf4ff; color: #0969da; }
+    nav .ch-num {
+      font-size: 10px; font-weight: 700;
+      color: #8c959f;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 5px 10px 2px;
+      margin-top: 12px;
+      display: block;
+    }
+
+    /* Main content */
+    article {
+      flex: 1;
+      max-width: 740px;
+      padding: 48px 40px;
+    }
+
+    /* ── Typography ── */
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1f2328;
+      margin-top: 56px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #d0d7de;
+      scroll-margin-top: 24px;
+    }
+    h2:first-of-type { margin-top: 0; }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1f2328;
+      margin: 24px 0 8px;
+    }
+
+    p  { margin-bottom: 12px; color: #57606a; font-size: 14.5px; }
+    li { color: #57606a; font-size: 14.5px; margin-bottom: 5px; }
+    ul { padding-left: 20px; margin-bottom: 12px; }
+
+    /* Inline code */
+    code {
+      font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+      font-size: 12.5px;
+      background: #eaeef2;
+      color: #cf222e;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #161b22;
+      color: #e6edf3;
+      border-radius: 6px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      margin: 12px 0 18px;
+      font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.65;
+    }
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    /* Callout boxes */
+    .callout {
+      border-left: 3px solid #0969da;
+      background: #ddf4ff;
+      padding: 12px 16px;
+      border-radius: 0 5px 5px 0;
+      margin: 16px 0;
+      font-size: 13.5px;
+      color: #0550ae;
+    }
+    .callout.warn {
+      border-color: #bf8700;
+      background: #fff8c5;
+      color: #7d4e00;
+    }
+    .callout.success {
+      border-color: #1a7f37;
+      background: #dafbe1;
+      color: #116329;
+    }
+
+    /* Chapter badge */
+    .ch-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #0969da;
+      background: #ddf4ff;
+      border: 1px solid #54aeff66;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-bottom: 6px;
+    }
+
+    /* Flow diagram */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+    .flow-box {
+      background: #fff;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1f2328;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .flow-arrow {
+      padding: 0 8px;
+      color: #8c959f;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* Limit table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 18px;
+      font-size: 13.5px;
+    }
+    th {
+      text-align: left;
+      padding: 8px 12px;
+      background: #f6f8fa;
+      border: 1px solid #d0d7de;
+      font-weight: 600;
+      color: #1f2328;
+    }
+    td {
+      padding: 8px 12px;
+      border: 1px solid #d0d7de;
+      color: #57606a;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f6f8fa; }
+
+    /* Back link */
+    .back { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: #0969da; text-decoration: none; margin-bottom: 32px; }
+    .back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+  <nav>
+    <a class="logo" href="/">&#10094; COMPILEME</a>
+    <ul>
+      <span class="ch-num">Chapters</span>
+      <li><a href="#ch1">1 · Project Setup</a></li>
+      <li><a href="#ch2">2 · Backend API</a></li>
+      <li><a href="#ch3">3 · Docker Sandboxing</a></li>
+      <li><a href="#ch4">4 · Frontend UI</a></li>
+      <li><a href="#ch5">5 · Security Decisions</a></li>
+      <li><a href="#ch6">6 · Request Flow</a></li>
+      <li><a href="#ch7">7 · Running Locally</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── Content ─────────────────────────────────────────────────────────── -->
+  <article>
+    <a class="back" href="/">&#8592; Back to Compiler</a>
+
+    <div style="margin-bottom:32px;">
+      <h1 style="font-size:26px;font-weight:800;color:#1f2328;margin-bottom:8px;">Build Docs</h1>
+      <p style="font-size:15px;">
+        A chronological walkthrough of how COMPILEME was built — from empty folder to a
+        fully sandboxed online C++ compiler.
+      </p>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────────────── -->
+    <h2 id="ch1">
+      <span class="ch-badge">Chapter 1</span><br/>
+      Project Setup &amp; Folder Structure
+    </h2>
+
+    <p>
+      The first decision was the tech stack. The goal was a <strong>minimal, dependency-light</strong>
+      prototype — no databases, no auth, no framework overhead.
+    </p>
+
+    <ul>
+      <li><strong>Backend:</strong> Node.js + Express — simple, fast to wire up</li>
+      <li><strong>Frontend:</strong> Plain HTML + vanilla JS — zero build step</li>
+      <li><strong>Execution:</strong> Docker (<code>gcc:latest</code>) — every run is isolated</li>
+    </ul>
+
+    <p>The resulting folder layout:</p>
+    <pre><code>COMPILEME/
+├── backend/
+│   ├── server.js          ← Express API
+│   └── package.json
+├── frontend/
+│   └── index.html         ← UI (editor + output)
+├── docs/
+│   └── index.html         ← this page
+├── Dockerfile             ← containerises the backend
+├── docker-compose.yml     ← mounts Docker socket
+└── README.md</code></pre>
+
+    <div class="callout">
+      No temp files are written to disk on the host. Code travels through stdin directly
+      into the Docker container.
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────────────── -->
+    <h2 id="ch2">
+      <span class="ch-badge">Chapter 2</span><br/>
+      Backend — Express API
+    </h2>
+
+    <p>
+      The backend is a single file: <code>backend/server.js</code>.
+      It exposes one endpoint and serves the frontend as static files.
+    </p>
+
+    <h3>Endpoint</h3>
+    <pre><code>POST /run
+Content-Type: application/json
+
+{ "code": "&lt;C++ source&gt;" }
+
+→ 200 OK
+{ "output": "&lt;stdout + stderr&gt;" }</code></pre>
+
+    <h3>Request validation</h3>
+    <ul>
+      <li>Rejects missing or non-string <code>code</code> fields immediately (400).</li>
+      <li>Rejects payloads larger than 50 KB before spawning Docker.</li>
+    </ul>
+
+    <h3>Child process</h3>
+    <p>
+      Node's built-in <code>child_process.spawn</code> launches <code>docker run</code>.
+      We use <code>spawn</code> (not <code>exec</code>) so we can pipe stdin without
+      shell quoting issues.
+    </p>
+    <pre><code>const proc = spawn('docker', dockerArgs);
+proc.stdin.write(code);   // send C++ source into container
+proc.stdin.end();</code></pre>
+
+    <p>
+      Both <code>stdout</code> and <code>stderr</code> of the Docker process are collected
+      into a single string and returned as <code>output</code>.
+    </p>
+
+    <!-- ─────────────────────────────────────────────────────────────────── -->
+    <h2 id="ch3">
+      <span class="ch-badge">Chapter 3</span><br/>
+      Docker Sandboxing
+    </h2>
+
+    <p>
+      Every code submission gets its own brand-new container. There is no shared state.
+    </p>
+
+    <h3>Execution strategy</h3>
+    <p>
+      Instead of mounting host directories, the source code is piped via <strong>stdin</strong>:
+    </p>
+    <pre><code>bash -c 'cat > /tmp/main.cpp \
+  &amp;&amp; g++ /tmp/main.cpp -o /tmp/main 2>&amp;1 \
+  &amp;&amp; timeout 2 /tmp/main 2>&amp;1'</code></pre>
+
+    <p>
+      <code>cat</code> reads stdin and writes <code>main.cpp</code>. Then <code>g++</code>
+      compiles it. If compilation succeeds, <code>timeout 2 ./main</code> runs the binary
+      with a hard 2-second wall-clock limit.
+    </p>
+
+    <h3>Resource limits applied</h3>
+    <table>
+      <tr><th>Flag</th><th>Value</th><th>What it prevents</th></tr>
+      <tr><td><code>--memory=256m</code></td><td>256 MB</td><td>Memory exhaustion / OOM attacks</td></tr>
+      <tr><td><code>--memory-swap=256m</code></td><td>256 MB (= memory)</td><td>Disables swap to enforce hard cap</td></tr>
+      <tr><td><code>--cpus=1</code></td><td>1 core</td><td>CPU hogging / spinning loops</td></tr>
+      <tr><td><code>--network=none</code></td><td>—</td><td>Any inbound or outbound network access</td></tr>
+      <tr><td><code>--pids-limit=64</code></td><td>64 processes</td><td>Fork bombs</td></tr>
+      <tr><td><code>timeout 2</code></td><td>2 s</td><td>Infinite loops, sleep() abuse</td></tr>
+      <tr><td><code>--rm</code></td><td>—</td><td>Ensures container is deleted on exit</td></tr>
+    </table>
+
+    <h3>Server-side hard timeout</h3>
+    <p>
+      A 15-second <code>setTimeout</code> in Node kills the Docker process with
+      <code>SIGKILL</code> if Docker itself stalls (e.g., image pull hangs, daemon unresponsive).
+      This prevents the HTTP request from hanging indefinitely.
+    </p>
+
+    <div class="callout warn">
+      The first run may take 30–60 s while Docker pulls <code>gcc:latest</code> (~1.2 GB).
+      Run <code>docker pull gcc:latest</code> once before starting the server.
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────────────── -->
+    <h2 id="ch4">
+      <span class="ch-badge">Chapter 4</span><br/>
+      Frontend UI
+    </h2>
+
+    <p>
+      A single <code>frontend/index.html</code> — no build step, no npm install, no framework.
+      Express serves it as a static file at <code>/</code>.
+    </p>
+
+    <h3>Key UI elements</h3>
+    <ul>
+      <li>
+        <strong>Code editor</strong> — a <code>&lt;textarea&gt;</code> styled to look like a terminal.
+        Tab key is intercepted to insert 4 spaces instead of moving focus.
+      </li>
+      <li>
+        <strong>Run button</strong> — shows a CSS spinner while waiting; disabled during execution
+        to prevent double-submit.
+      </li>
+      <li>
+        <strong>Output box</strong> — a <code>&lt;pre&gt;</code> element.
+        Border turns green on success, red if the output contains an error string.
+      </li>
+    </ul>
+
+    <h3>fetch call</h3>
+    <pre><code>const res  = await fetch('/run', {
+  method:  'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body:    JSON.stringify({ code })
+});
+const data = await res.json();
+outputEl.textContent = data.output;</code></pre>
+
+    <p>
+      Frontend and backend share the same origin (<code>localhost:3300</code>), so no CORS
+      configuration is needed.
+    </p>
+
+    <!-- ─────────────────────────────────────────────────────────────────── -->
+    <h2 id="ch5">
+      <span class="ch-badge">Chapter 5</span><br/>
+      Security Decisions
+    </h2>
+
+    <h3>No shell injection</h3>
+    <p>
+      The C++ code is never interpolated into a shell string. It is written to
+      <code>proc.stdin</code> as raw bytes. This means backticks, semicolons, dollar signs,
+      quotes — none of them can escape the container.
+    </p>
+
+    <h3>No host filesystem access</h3>
+    <p>
+      No directories are mounted from the host. The container's <code>/tmp</code> is ephemeral
+      and disappears with <code>--rm</code>.
+    </p>
+
+    <h3>No network from containers</h3>
+    <p>
+      <code>--network=none</code> means user code cannot make HTTP requests, call external
+      APIs, exfiltrate data, or connect back to an attacker.
+    </p>
+
+    <h3>Input size cap</h3>
+    <p>
+      Payloads over 50 KB are rejected before Docker is ever invoked. Express's
+      <code>json({ limit: '100kb' })</code> handles the HTTP layer.
+    </p>
+
+    <!-- ─────────────────────────────────────────────────────────────────── -->
+    <h2 id="ch6">
+      <span class="ch-badge">Chapter 6</span><br/>
+      Request Flow — End to End
+    </h2>
+
+    <div class="flow">
+      <div class="flow-box">Browser<br/><small>clicks Run</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">POST /run<br/><small>JSON body</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Express<br/><small>validates input</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">docker run<br/><small>stdin = code</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">gcc container<br/><small>compile + run</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">stdout/stderr<br/><small>collected</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">JSON response<br/><small>output field</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Output box<br/><small>displayed</small></div>
+    </div>
+
+    <ol style="padding-left:20px; margin-top:12px; color:#57606a; font-size:14px;">
+      <li>User writes C++ code and clicks <strong>Run</strong>.</li>
+      <li>Browser sends <code>POST /run</code> with the code as a JSON string.</li>
+      <li>Express validates and size-checks the payload.</li>
+      <li>Node spawns <code>docker run --rm -i gcc:latest bash -c '...'</code>.</li>
+      <li>The C++ source is piped to <code>cat</code> inside the container → written to <code>/tmp/main.cpp</code>.</li>
+      <li><code>g++</code> compiles the file. Errors go to stderr, redirected to stdout via <code>2&gt;&amp;1</code>.</li>
+      <li>If compilation succeeds, <code>timeout 2 ./main</code> executes the binary.</li>
+      <li>All output (stdout + stderr) is collected by Node.</li>
+      <li>Container exits and is auto-removed (<code>--rm</code>).</li>
+      <li>Node returns <code>{ "output": "..." }</code> — browser displays it.</li>
+    </ol>
+
+    <!-- ─────────────────────────────────────────────────────────────────── -->
+    <h2 id="ch7">
+      <span class="ch-badge">Chapter 7</span><br/>
+      Running Locally
+    </h2>
+
+    <h3>Prerequisites</h3>
+    <ul>
+      <li>Node.js 18+ — <a href="https://nodejs.org" style="color:#0969da;">nodejs.org</a></li>
+      <li>Docker Desktop (Mac/Windows) or Docker Engine (Linux)</li>
+    </ul>
+
+    <h3>Option A — run directly on host (simplest)</h3>
+    <pre><code># 1. Pull the gcc image once (saves time on first run)
+docker pull gcc:latest
+
+# 2. Install backend dependencies
+cd backend &amp;&amp; npm install &amp;&amp; cd ..
+
+# 3. Start the server
+node backend/server.js
+
+# 4. Open in browser
+open http://localhost:3300</code></pre>
+
+    <h3>Option B — run via Docker Compose</h3>
+    <pre><code># Build and start the containerised backend
+docker-compose up --build
+
+# Open in browser
+open http://localhost:3300</code></pre>
+
+    <div class="callout success">
+      The docs page is served at <code>http://localhost:3300/docs</code>.
+    </div>
+
+    <h3>Environment variable</h3>
+    <p>Override the default port with <code>PORT</code>:</p>
+    <pre><code>PORT=8080 node backend/server.js</code></pre>
+
+    <br/><br/>
+  </article>
+</div>
+</body>
+</html>

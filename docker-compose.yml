@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3300:3300"
+    volumes:
+      # Mount the host Docker socket so the backend can spawn gcc containers
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
